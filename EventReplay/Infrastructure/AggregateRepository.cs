@@ -14,7 +14,7 @@
       eventStore[aggregate.Id].AddRange(aggregate.NewEvents);
     }
 
-    public Aggregate Get<T>(Guid id) where T : Aggregate
+    public T Get<T>(Guid id) where T : Aggregate
     {
       if (!eventStore.ContainsKey(id))
         return null;

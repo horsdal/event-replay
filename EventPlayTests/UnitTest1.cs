@@ -27,17 +27,19 @@ namespace EventPlayTests
         {
             if (serviceType == typeof(IAsyncRequestHandler<CreateUserCommand>))
                 return new CreateUserCommandHandler(new AggregateRepository(), new EventDispatcher(this.mediator));
-            if (serviceType == typeof(INotificationHandler<UserCreatedEvent>))
+            if (serviceType == typeof(IAsyncRequestHandler<ChangeUsernameCommand>))
+                return new ChangeUsernameCommandHandler(new AggregateRepository(), new EventDispatcher(this.mediator));
+            if (serviceType == typeof(INotificationHandler<UserCreatedEvent>)
+             || serviceType == typeof(INotificationHandler<UsernameChangedEvent>))
                 return new UserNameToIdReadModel();
             return null;
         }
 
         private IEnumerable<object> MultiInstanceFactory(Type serviceType)
         {
-            if (serviceType == typeof(IAsyncRequestHandler<CreateUserCommand>))
-                yield return new CreateUserCommandHandler(new AggregateRepository(), new EventDispatcher(this.mediator));
-            if (serviceType == typeof(INotificationHandler<UserCreatedEvent>))
-                yield return new UserNameToIdReadModel();
+            var instance = SingleInstanceFactory(serviceType);
+            if (instance != null)
+                yield return instance;
         }
 
         [Theory, AutoData]
@@ -57,6 +59,19 @@ namespace EventPlayTests
             var actual = this.aggregateRepository.Get<UserAggregate>(id);
             Assert.NotNull(actual);
             Assert.Equal(id, actual.Id);
+        }
+
+        [Theory, AutoData]
+        public async Task change_username(string email, string username, string username2)
+        {
+            var createUser = new CreateUserCommand(email, username);
+            await this.mediator.Send(createUser);
+            var id = this.readmodel.GetIdByUserName(username);
+
+            var changeUsername = new ChangeUsernameCommand(id, username2);
+            await this.mediator.Send(changeUsername);
+
+            Assert.Equal(id, this.readmodel.GetIdByUserName(username2));
         }
     }
 }
