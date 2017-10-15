@@ -28,10 +28,17 @@ namespace EventPlayTests
       this.repo = repo;
       this.eventDispatcher = eventDispatcher;
     }
+    
     public Task Handle(ChangeUsernameCommand command)
     {
       var aggregate = this.repo.Get<UserAggregate>(command.Id);
-      aggregate.ChangeUsername(command);
+      
+      if (Guid.Empty.Equals(aggregate.Id) || string.IsNullOrWhiteSpace(command.Username))
+        return Task.CompletedTask;
+
+      var usernameChanged = new UsernameChangedEvent(command.Username, aggregate.Id, aggregate.Username);
+      aggregate.Emit(usernameChanged);
+      
       this.repo.Save(aggregate);
       return this.eventDispatcher.Dispatch(aggregate);
     }

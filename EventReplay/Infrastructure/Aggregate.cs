@@ -17,7 +17,7 @@
         Play(@event);
     }
         
-    protected void Emit(Event @event)
+    internal void Emit(Event @event)
     {
       this.newEvents.Add(@event);
       Play(@event);

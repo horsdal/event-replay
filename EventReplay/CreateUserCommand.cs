@@ -1,5 +1,6 @@
 ﻿namespace EventReplay
 {
+  using System;
   using System.Threading.Tasks;
   using EventReplay.Infrastructure;
   using MediatR;
@@ -30,7 +31,8 @@
     public Task Handle(CreateUserCommand command)
     {
       var aggregate = new UserAggregate();
-      aggregate.Create(command);
+      var createdEvent = new UserCreatedEvent(command.Username, command.EmailAddress, Guid.NewGuid());
+      aggregate.Emit(createdEvent);
       this.repo.Save(aggregate);
       return this.eventDispatcher.Dispatch(aggregate);
     }
