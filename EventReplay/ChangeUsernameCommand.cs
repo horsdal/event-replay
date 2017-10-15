@@ -20,27 +20,22 @@ namespace EventPlayTests
   
   public class ChangeUsernameCommandHandler : IAsyncRequestHandler<ChangeUsernameCommand>
   {
-    private readonly AggregateRepository repo;
-    private readonly EventDispatcher eventDispatcher;
+    private readonly CommandHandlersHelper<UserAggregate> helper;
 
-    public ChangeUsernameCommandHandler(AggregateRepository repo, EventDispatcher eventDispatcher)
+    public ChangeUsernameCommandHandler(CommandHandlersHelper<UserAggregate> helper)
     {
-      this.repo = repo;
-      this.eventDispatcher = eventDispatcher;
+      this.helper = helper;
     }
     
     public Task Handle(ChangeUsernameCommand command)
     {
-      var aggregate = this.repo.Get<UserAggregate>(command.Id);
-      
-      if (Guid.Empty.Equals(aggregate.Id) || string.IsNullOrWhiteSpace(command.Username))
-        return Task.CompletedTask;
-
-      var usernameChanged = new UsernameChangedEvent(command.Username, aggregate.Id, aggregate.Username);
-      aggregate.Emit(usernameChanged);
-      
-      this.repo.Save(aggregate);
-      return this.eventDispatcher.Dispatch(aggregate);
+      return this.helper.Handle(command.Id, aggregate =>
+      {
+        if (Guid.Empty.Equals(aggregate.Id) || string.IsNullOrWhiteSpace(command.Username))
+          return;
+        var usernameChanged = new UsernameChangedEvent(command.Username, aggregate.Id, aggregate.Username);
+        aggregate.Emit(usernameChanged);
+      });
     }
   }
 }

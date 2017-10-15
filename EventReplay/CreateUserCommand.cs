@@ -19,22 +19,22 @@
   
   public class CreateUserCommandHandler : IAsyncRequestHandler<CreateUserCommand>
   {
-    private readonly AggregateRepository repo;
-    private readonly EventDispatcher eventDispatcher;
+    private readonly CommandHandlersHelper<UserAggregate> helper;
 
-    public CreateUserCommandHandler(AggregateRepository repo, EventDispatcher eventDispatcher)
+    public CreateUserCommandHandler(CommandHandlersHelper<UserAggregate> helper)
     {
-      this.repo = repo;
-      this.eventDispatcher = eventDispatcher;
+      this.helper = helper;
     }
         
     public Task Handle(CreateUserCommand command)
     {
-      var aggregate = new UserAggregate();
-      var createdEvent = new UserCreatedEvent(command.Username, command.EmailAddress, Guid.NewGuid());
-      aggregate.Emit(createdEvent);
-      this.repo.Save(aggregate);
-      return this.eventDispatcher.Dispatch(aggregate);
+      return this.helper.Handle(Guid.Empty, _ =>
+      {
+        var aggregate = new UserAggregate();
+        var createdEvent = new UserCreatedEvent(command.Username, command.EmailAddress, Guid.NewGuid());
+        aggregate.Emit(createdEvent);
+        return aggregate;
+      });
     }
   }
 

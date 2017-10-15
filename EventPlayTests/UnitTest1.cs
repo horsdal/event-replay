@@ -26,9 +26,9 @@ namespace EventPlayTests
         private object SingleInstanceFactory(Type serviceType)
         {
             if (serviceType == typeof(IAsyncRequestHandler<CreateUserCommand>))
-                return new CreateUserCommandHandler(new AggregateRepository(), new EventDispatcher(this.mediator));
+                return new CreateUserCommandHandler(new CommandHandlersHelper<UserAggregate>(new AggregateRepository(), new EventDispatcher(this.mediator)));
             if (serviceType == typeof(IAsyncRequestHandler<ChangeUsernameCommand>))
-                return new ChangeUsernameCommandHandler(new AggregateRepository(), new EventDispatcher(this.mediator));
+                return new ChangeUsernameCommandHandler(new CommandHandlersHelper<UserAggregate>(new AggregateRepository(), new EventDispatcher(this.mediator)));
             if (serviceType == typeof(INotificationHandler<UserCreatedEvent>)
              || serviceType == typeof(INotificationHandler<UsernameChangedEvent>))
                 return new UserNameToIdReadModel();
