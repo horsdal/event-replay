@@ -4,21 +4,9 @@
   using EventPlayTests;
   using EventReplay.Infrastructure;
 
-  public class UserAggregate : Aggregate
+  public class UserAggregate : Aggregate<UserAggregate>
   {
-    public string Username { get; private set; } = String.Empty;
-    public string Email { get; private set; } = String.Empty;
-
-    protected void When(UserCreatedEvent e)
-    {
-      this.Username = e.Username;
-      this.Email = e.EmailAddress;
-      this.Id = e.Id;
-    }
-
-    protected void When(UsernameChangedEvent e)
-    {
-      this.Username = e.Username;
-    }
+    public string Username { get; protected internal set; } = String.Empty;
+    public string Email { get; internal set; } = String.Empty;
   }
 }

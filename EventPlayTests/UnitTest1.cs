@@ -13,22 +13,22 @@ namespace EventPlayTests
     public class UnitTest1
     {
         private readonly UserNameToIdReadModel readmodel;
-        private readonly AggregateRepository aggregateRepository;
+        private readonly AggregateRepository<UserAggregate> aggregateRepository;
         private readonly Mediator mediator;
 
         public UnitTest1()
         {
             this.mediator = new Mediator(SingleInstanceFactory, MultiInstanceFactory);
-            this.aggregateRepository = new AggregateRepository();
+            this.aggregateRepository = new AggregateRepository<UserAggregate>();
             this.readmodel = new UserNameToIdReadModel();
         }
 
         private object SingleInstanceFactory(Type serviceType)
         {
             if (serviceType == typeof(IAsyncRequestHandler<CreateUserCommand>))
-                return new CreateUserCommandHandler(new CommandHandlersHelper<UserAggregate>(new AggregateRepository(), new EventDispatcher(this.mediator)));
+                return new CreateUserCommandHandler(new CommandHandlersHelper<UserAggregate>(new AggregateRepository<UserAggregate>(), new EventDispatcher(this.mediator)));
             if (serviceType == typeof(IAsyncRequestHandler<ChangeUsernameCommand>))
-                return new ChangeUsernameCommandHandler(new CommandHandlersHelper<UserAggregate>(new AggregateRepository(), new EventDispatcher(this.mediator)));
+                return new ChangeUsernameCommandHandler(new CommandHandlersHelper<UserAggregate>(new AggregateRepository<UserAggregate>(), new EventDispatcher(this.mediator)));
             if (serviceType == typeof(INotificationHandler<UserCreatedEvent>)
              || serviceType == typeof(INotificationHandler<UsernameChangedEvent>))
                 return new UserNameToIdReadModel();
@@ -56,7 +56,7 @@ namespace EventPlayTests
             var cmd = new CreateUserCommand(email, username);
             await this.mediator.Send(cmd);
             var id = this.readmodel.GetIdByUserName(username);
-            var actual = this.aggregateRepository.Get<UserAggregate>(id);
+            var actual = this.aggregateRepository.Get(id);
             Assert.NotNull(actual);
             Assert.Equal(id, actual.Id);
         }

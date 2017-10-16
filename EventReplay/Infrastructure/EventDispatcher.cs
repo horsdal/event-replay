@@ -13,10 +13,10 @@
       this.mediator = mediator;
     }
         
-    public Task Dispatch(Aggregate aggregate)
+    public Task Dispatch<T>(Aggregate<T> aggregate) where T : Aggregate<T>
     {
       return Task.WhenAll(
-        aggregate.NewEvents.Select(e => this.mediator.Publish<Event>(e))
+        aggregate.NewEvents.Select(e => this.mediator.Publish<Event<T>>(e))
       );
     }
   }

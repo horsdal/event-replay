@@ -2,7 +2,8 @@
 {
   using MediatR;
 
-  public interface Event : INotification
+  public interface Event<T> : INotification where T : Aggregate<T>
   {
+    void When(T aggregate);
   }
 }

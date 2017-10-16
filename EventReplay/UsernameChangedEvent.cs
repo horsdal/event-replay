@@ -3,7 +3,7 @@
   using System;
   using EventReplay.Infrastructure;
 
-  public class UsernameChangedEvent : Event
+  public class UsernameChangedEvent : Event<UserAggregate>
   {
     public string Username { get; }
     public Guid Id { get; }
@@ -14,6 +14,11 @@
       this.Username = username;
       this.Id = id;
       this.OldUsername = oldUsername;
+    }
+
+    public void When(UserAggregate aggregate)
+    {
+      aggregate.Username = this.Username;
     }
   }
 }
