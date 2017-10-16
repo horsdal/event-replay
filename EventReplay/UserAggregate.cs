@@ -6,19 +6,40 @@
 
   public class UserAggregate : Aggregate
   {
-    public string Username { get; private set; } = String.Empty;
-    public string Email { get; private set; } = String.Empty;
+    private readonly UserAggregateProjector projector;
+    public string Username { get; internal set; } = String.Empty;
+    public string Email { get; internal set; } = String.Empty;
+
+    public UserAggregate()
+    {
+      this.projector = new UserAggregateProjector(this);
+    }
+
+    protected override object GetProjector()
+    {
+      return this.projector;
+    }
+  }
+
+  public class UserAggregateProjector
+  {
+    private readonly UserAggregate projection;
+
+    public UserAggregateProjector(UserAggregate projection)
+    {
+      this.projection = projection;
+    }
 
     protected void When(UserCreatedEvent e)
     {
-      this.Username = e.Username;
-      this.Email = e.EmailAddress;
-      this.Id = e.Id;
+      this.projection.Username = e.Username;
+      this.projection.Email = e.EmailAddress;
+      this.projection.Id = e.Id;
     }
 
     protected void When(UsernameChangedEvent e)
     {
-      this.Username = e.Username;
+      this.projection.Username = e.Username;
     }
   }
 }
